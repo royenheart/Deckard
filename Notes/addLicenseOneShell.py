@@ -3,10 +3,10 @@
 import sys
 
 if len(sys.argv) !=5 and len(sys.argv) !=4:
-    print >> sys.stderr, "Usage:", sys.argv[0], "<license file> <file> <start delimiter> [end delimiter]"
+    print("Usage:", sys.argv[0], "<license file> <file> <start delimiter> [end delimiter]", file=sys.stderr)
     sys.exit(1)
 
-print "Adding license IN-PLACE:", sys.argv[1:]
+print("Adding license IN-PLACE:", sys.argv[1:])
 
 # also, maintain the first line if it starts with '#!'
 
@@ -38,20 +38,20 @@ flines = f.readlines()
 f.close()
 for line in flines:
     if "copyright" in line.lower():
-        print "Error: file already contain license: ", line,
-        print "Skip: ", sys.argv[2]
+        print("Error: file already contain license: ", line, end=' ')
+        print("Skip: ", sys.argv[2])
         sys.exit(1)
 
 f = open(sys.argv[2], 'w')
 # maintain the first line if it is '#!'
 if len(flines)>0:
    if flines[0].startswith('#!'):
-      print >> f, flines[0]
+      print(flines[0], file=f)
       flines = flines[1:]
 for line in lines:
-    print >> f, line,
+    print(line, end=' ', file=f)
 for line in flines:
-    print >> f, line,
+    print(line, end=' ', file=f)
 
-print "Done. See file:", sys.argv[2]
+print("Done. See file:", sys.argv[2])
 

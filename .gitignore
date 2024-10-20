@@ -2,3 +2,6 @@
 *.d
 *.a
 *.pyc
+
+.vscode
+SOW3

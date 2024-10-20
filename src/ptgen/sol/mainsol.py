@@ -43,7 +43,7 @@ sys.path.append('..')
 import YaccParser,YaccLexer
 
 if len(sys.argv) != 2:
-    print >> sys.stderr, "usage %s grammar"%sys.argv[0]
+    print("usage %s grammar"%sys.argv[0], file=sys.stderr)
     sys.exit(1)
 
 
@@ -55,7 +55,7 @@ grammar.close()
 
 outg= open('pt_'+sys.argv[1],'w')
 
-print >> outg, """
+print("""
 %pure-parser
 
 %{
@@ -75,21 +75,21 @@ int yylex(YYSTYPE *yylvalp);
 Tree *root;
 %}
 
-"""
+""", file=outg)
 
 for nt in y.NonTerminals:
-    print >> outg, '%type <t>', nt
+    print('%type <t>', nt, file=outg)
 
 
 header= open(sys.argv[1]+'.head','r')
 outg.write( header.read() )
 header.close()
 
-print >> outg, """
+print("""
 
 %%
 
-"""
+""", file=outg)
 
 name2id= {}
 current= 0
@@ -107,9 +107,9 @@ for t in y.Terminals:
 
 
 for rule in y.Rules:
-    print >> outg, rule[0], ':', 
+    print(rule[0], ':', end=' ', file=outg) 
     for production in rule[1]:
-        print >> outg, production[1],
+        print(production[1], end=' ', file=outg)
     """
     leave= False
     for production in rule[1]:
@@ -120,35 +120,34 @@ for rule in y.Rules:
         print >> outg, ';\n'
         continue
     """
-    print >> outg, """
+    print("""
     {
-        $$= new NonTerminal(""", name2id[rule[0]], ");"
+        $$= new NonTerminal(""", name2id[rule[0]], ");", file=outg)
     nodelist= [ production[0] for production \
-                in zip(range(1,len(rule[1])+1),rule[1]) \
+                in zip(list(range(1,len(rule[1])+1)),rule[1]) \
                 if production[1][0]=="node"]
 
     for i in range(len(nodelist)):
-        print >> outg, "\n        $$->addChild($%d);"%nodelist[i]
-        print >> outg, "\n        $%d->parent= $$;"%nodelist[i]
+        print("\n        $$->addChild($%d);"%nodelist[i], file=outg)
+        print("\n        $%d->parent= $$;"%nodelist[i], file=outg)
         if i + 1 < len(nodelist):
-            print >> outg,\
-                       "\n        $%d->nextSibbling= $%d;"%\
-                       (nodelist[i],nodelist[i+1])
+            print("\n        $%d->nextSibbling= $%d;"%\
+                       (nodelist[i],nodelist[i+1]), file=outg)
     if rule[0]=="sourceUnit":
-        print >> outg, "\n        root= $$;"
-    print >> outg, """
+        print("\n        root= $$;", file=outg)
+    print("""
     }
     ;
-"""
+""", file=outg)
 
-print >> outg, """
+print("""
 
 %%
 
-"""
+""", file=outg)
 
 footer= open(sys.argv[1]+'.foot','r')
-print >> outg, footer.read()
+print(footer.read(), file=outg)
 footer.close()
 
 
@@ -157,7 +156,7 @@ outg.close()
 
 head = open('head.cc','w')
 
-print >> head, """
+print("""
 #include <map>
 #include <string>
 
@@ -168,17 +167,17 @@ extern map<int,string> id2name;
 
 void id_init()
 {
-"""
+""", file=head)
 for nt in y.NonTerminals:
     id= name2id[nt]
-    print >> head, 'name2id["%s"]= %d;'%(nt,id)
-    print >> head, 'id2name[%d]= "%s";'%(id,nt)
+    print('name2id["%s"]= %d;'%(nt,id), file=head)
+    print('id2name[%d]= "%s";'%(id,nt), file=head)
 for t in y.Terminals:
     id= name2id[t]
-    print >> head, 'name2id["%s"]= %d;'%(t,id)
-    print >> head, 'id2name[%d]= "%s";'%(id,t)
-print >> head, '}'
-print >> head
+    print('name2id["%s"]= %d;'%(t,id), file=head)
+    print('id2name[%d]= "%s";'%(id,t), file=head)
+print('}', file=head)
+print(file=head)
 
 head.close()
 
